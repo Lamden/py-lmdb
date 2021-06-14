@@ -289,7 +289,7 @@ _CFFI_CDEF_PATCHED = '''
 
 _CFFI_VERIFY = '''
     #include <sys/stat.h>
-    #include "lamdb.h"
+    #include "lmdb.h"
     #include "preload.h"
 
     // Helpers below inline MDB_vals. Avoids key alloc/dup on CPython, where
