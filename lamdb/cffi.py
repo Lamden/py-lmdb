@@ -1,5 +1,5 @@
 #
-# Copyright 2013 The py-lmdb authors, all rights reserved.
+# Copyright 2013 The py-lamdb authors, all rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted only as authorized by the OpenLDAP
@@ -23,7 +23,7 @@
 """
 CPython/CFFI wrapper for OpenLDAP's "Lightning" MDB database.
 
-Please see https://lmdb.readthedocs.io/
+Please see https://lamdb.readthedocs.io/
 """
 
 from __future__ import absolute_import
@@ -44,9 +44,9 @@ try:
 except ImportError:
     import builtins as __builtin__  # type: ignore
 
-import lmdb
+import lamdb
 try:
-    from lmdb import _config
+    from lamdb import _config
 except ImportError:
     _config = None  # type: ignore
 
@@ -289,7 +289,7 @@ _CFFI_CDEF_PATCHED = '''
 
 _CFFI_VERIFY = '''
     #include <sys/stat.h>
-    #include "lmdb.h"
+    #include "lamdb.h"
     #include "preload.h"
 
     // Helpers below inline MDB_vals. Avoids key alloc/dup on CPython, where
@@ -349,7 +349,7 @@ _CFFI_VERIFY = '''
 
 '''
 
-if not lmdb._reading_docs():
+if not lamdb._reading_docs():
     import cffi
 
     # Try to use distutils-bundled CFFI configuration to avoid a recompile and
@@ -371,7 +371,7 @@ if not lmdb._reading_docs():
     _ffi.cdef(_CFFI_CDEF)
     _lib = _ffi.verify(_CFFI_VERIFY,
                        modulename='lmdb_cffi',
-                       ext_package='lmdb',
+                       ext_package='lamdb',
                        sources=_config_vars['extra_sources'],
                        extra_compile_args=_config_vars['extra_compile_args'],
                        include_dirs=_config_vars['extra_include_dirs'],
@@ -387,7 +387,7 @@ if not lmdb._reading_docs():
 
 class Error(Exception):
     """Raised when an LMDB-related error occurs, and no more specific
-    :py:class:`lmdb.Error` subclass exists."""
+    :py:class:`lamdb.Error` subclass exists."""
     def __init__(self, what, code=0):
         self.what = what
         self.code = code
@@ -407,9 +407,9 @@ class KeyExistsError(Error):
 class NotFoundError(Error):
     """No matching key/data pair found.
 
-    Normally py-lmdb indicates a missing key by returning ``None``, or a
+    Normally py-lamdb indicates a missing key by returning ``None``, or a
     user-supplied default value, however LMDB may return this error where
-    py-lmdb does not know to convert it into a non-exceptional return.
+    py-lamdb does not know to convert it into a non-exceptional return.
     """
     MDB_NAME = 'MDB_NOTFOUND'
 
@@ -510,7 +510,7 @@ class DiskError(Error):
     MDB_NAME = 'ENOSPC'
 
 # Prepare _error_map, a mapping of integer MDB_ERROR_CODE to exception class.
-if not lmdb._reading_docs():
+if not lamdb._reading_docs():
     _error_map = {}
     for obj in list(globals().values()):
         if inspect.isclass(obj) and issubclass(obj, Error) and obj is not Error:
@@ -561,11 +561,11 @@ def version(subpatch=False):
     """
     Return a tuple of integers `(major, minor, patch)` describing the LMDB
     library version that the binding is linked against. The version of the
-    binding itself is available from ``lmdb.__version__``.
+    binding itself is available from ``lamdb.__version__``.
 
         `subpatch`:
             If true, returns a 4 integer tuple consisting of the same plus
-            an extra integer that represents any patches applied by py-lmdb
+            an extra integer that represents any patches applied by py-lamdb
             itself (0 representing no patches).
 
     """
@@ -590,14 +590,14 @@ class Environment(object):
     simultaneous write transaction is allowed, however there is no limit on the
     number of read transactions even when a write transaction exists.
 
-    This class is aliased to `lmdb.open`.
+    This class is aliased to `lamdb.open`.
 
     It is a serious error to have open the same LMDB file in the same process at
     the same time.  Failure to heed this may lead to data corruption and
     interpreter crash.
 
     Equivalent to `mdb_env_open()
-    <http://lmdb.tech/doc/group__mdb.html#ga1fe2740e25b1689dc412e7b9faadba1b>`_
+    <http://lamdb.tech/doc/group__mdb.html#ga1fe2740e25b1689dc412e7b9faadba1b>`_
 
         `path`:
             Location of directory (if `subdir=True`) or file prefix to store
@@ -812,7 +812,7 @@ class Environment(object):
             The new size in bytes.
 
         Equivalent to `mdb_env_set_mapsize()
-        <http://lmdb.tech/doc/group__mdb.html#gaa2506ec8dab3d969b0e609cd82e619e5>`_
+        <http://lamdb.tech/doc/group__mdb.html#gaa2506ec8dab3d969b0e609cd82e619e5>`_
 
         Warning:
         There's a data race in the underlying library that may cause
@@ -834,7 +834,7 @@ class Environment(object):
         transactions. Repeat calls to :py:meth:`close` have no effect.
 
         Equivalent to `mdb_env_close()
-        <http://lmdb.tech/doc/group__mdb.html#ga4366c43ada8874588b6a62fbda2d1e95>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga4366c43ada8874588b6a62fbda2d1e95>`_
         """
         if self._env:
             if self._deps:
@@ -860,7 +860,7 @@ class Environment(object):
         stored.
 
         Equivalent to `mdb_env_get_path()
-        <http://lmdb.tech/doc/group__mdb.html#gac699fdd8c4f8013577cb933fb6a757fe>`_
+        <http://lamdb.tech/doc/group__mdb.html#gac699fdd8c4f8013577cb933fb6a757fe>`_
         """
         path = _ffi.new('char **')
         rc = _lib.mdb_env_get_path(self._env, path)
@@ -886,7 +886,7 @@ class Environment(object):
             this parameter may be set only if compact=True.
 
         Equivalent to `mdb_env_copy2() or mdb_env_copy3()
-        <http://lmdb.tech/doc/group__mdb.html#ga5d51d6130325f7353db0955dbedbc378>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga5d51d6130325f7353db0955dbedbc378>`_
         """
         flags = _lib.MDB_CP_COMPACT if compact else 0
         if txn and not _have_patched_lmdb:
@@ -922,7 +922,7 @@ class Environment(object):
             is not available if the module was built with LMDB_PURE.
 
         Equivalent to `mdb_env_copyfd2() or mdb_env_copyfd3
-        <http://lmdb.tech/doc/group__mdb.html#ga5d51d6130325f7353db0955dbedbc378>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga5d51d6130325f7353db0955dbedbc378>`_
         """
         if txn and not _have_patched_lmdb:
             raise TypeError("Non-patched LMDB doesn't support transaction with env.copy")
@@ -947,7 +947,7 @@ class Environment(object):
         """Flush the data buffers to disk.
 
         Equivalent to `mdb_env_sync()
-        <http://lmdb.tech/doc/group__mdb.html#ga85e61f05aa68b520cc6c3b981dba5037>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga85e61f05aa68b520cc6c3b981dba5037>`_
 
         Data is always written to disk when :py:meth:`Transaction.commit` is
         called, but the operating system may keep it buffered. MDB always
@@ -995,7 +995,7 @@ class Environment(object):
         +--------------------+---------------------------------------+
 
         Equivalent to `mdb_env_stat()
-        <http://lmdb.tech/doc/group__mdb.html#gaf881dca452050efbd434cd16e4bae255>`_
+        <http://lamdb.tech/doc/group__mdb.html#gaf881dca452050efbd434cd16e4bae255>`_
         """
         st = _ffi.new('MDB_stat *')
         rc = _lib.mdb_env_stat(self._env, st)
@@ -1026,7 +1026,7 @@ class Environment(object):
         +--------------------+---------------------------------------------+
 
         Equivalent to `mdb_env_info()
-        <http://lmdb.tech/doc/group__mdb.html#ga18769362c7e7d6cf91889a028a5c5947>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga18769362c7e7d6cf91889a028a5c5947>`_
         """
         info = _ffi.new('MDB_envinfo *')
         rc = _lib.mdb_env_info(self._env, info)
@@ -1121,7 +1121,7 @@ class Environment(object):
 
         ::
 
-            >>> env = lmdb.open('/tmp/test', max_dbs=2)
+            >>> env = lamdb.open('/tmp/test', max_dbs=2)
             >>> with env.begin(write=True) as txn
             ...     txn.put('somename', 'somedata')
 
@@ -1224,7 +1224,7 @@ class Environment(object):
         return db
 
     def begin(self, db=None, parent=None, write=False, buffers=False):
-        """Shortcut for :py:class:`lmdb.Transaction`"""
+        """Shortcut for :py:class:`lamdb.Transaction`"""
         return Transaction(self, db, parent, write, buffers)
 
 
@@ -1309,7 +1309,7 @@ class Transaction(object):
                 txn.put('a', 'b')
 
     Equivalent to `mdb_txn_begin()
-    <http://lmdb.tech/doc/group__mdb.html#gad7ea55da06b77513609efebd44b26920>`_
+    <http://lamdb.tech/doc/group__mdb.html#gad7ea55da06b77513609efebd44b26920>`_
 
         `env`:
             Environment the transaction should be on.
@@ -1320,7 +1320,7 @@ class Transaction(object):
             basis below.
 
         `parent`:
-            ``None``, or a parent transaction (see lmdb.h).
+            ``None``, or a parent transaction (see lamdb.h).
 
         `write`:
             Transactions are read-only by default. To modify the database, you
@@ -1448,7 +1448,7 @@ class Transaction(object):
         unavailable, and invalidates existing cursors.
 
         Equivalent to `mdb_drop()
-        <http://lmdb.tech/doc/group__mdb.html#gab966fab3840fc54a6571dfb32b00f2db>`_
+        <http://lamdb.tech/doc/group__mdb.html#gab966fab3840fc54a6571dfb32b00f2db>`_
         """
         while db._deps:
             db._deps.pop()._invalidate()
@@ -1479,7 +1479,7 @@ class Transaction(object):
         """Commit the pending transaction.
 
         Equivalent to `mdb_txn_commit()
-        <http://lmdb.tech/doc/group__mdb.html#ga846fbd6f46105617ac9f4d76476f6597>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga846fbd6f46105617ac9f4d76476f6597>`_
         """
         while self._deps:
             self._deps.pop()._invalidate()
@@ -1497,7 +1497,7 @@ class Transaction(object):
         been closed.
 
         Equivalent to `mdb_txn_abort()
-        <http://lmdb.tech/doc/group__mdb.html#ga73a5938ae4c3239ee11efa07eb22b882>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga73a5938ae4c3239ee11efa07eb22b882>`_
         """
         if self._txn:
             while self._deps:
@@ -1515,7 +1515,7 @@ class Transaction(object):
         a `dupsort=True` database.
 
         Equivalent to `mdb_get()
-        <http://lmdb.tech/doc/group__mdb.html#ga8bf10cd91d3f3a83a34d04ce6b07992d>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga8bf10cd91d3f3a83a34d04ce6b07992d>`_
         """
         rc = _lib.pymdb_get(self._txn, (db or self._db)._dbi,
                             key, len(key), self._val)
@@ -1534,7 +1534,7 @@ class Transaction(object):
         On success, the cursor is positioned on the new record.
 
         Equivalent to `mdb_put()
-        <http://lmdb.tech/doc/group__mdb.html#ga4fa8573d9236d54687c61827ebf8cac0>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga4fa8573d9236d54687c61827ebf8cac0>`_
 
             `key`:
                 Bytestring key to store.
@@ -1602,7 +1602,7 @@ class Transaction(object):
         """Delete a key from the database.
 
         Equivalent to `mdb_del()
-        <http://lmdb.tech/doc/group__mdb.html#gab8182f9360ea69ac0afd4a4eaab1ddb0>`_
+        <http://lamdb.tech/doc/group__mdb.html#gab8182f9360ea69ac0afd4a4eaab1ddb0>`_
 
             `key`:
                 The key to delete.
@@ -1627,7 +1627,7 @@ class Transaction(object):
         return True
 
     def cursor(self, db=None):
-        """Shortcut for ``lmdb.Cursor(db, self)``"""
+        """Shortcut for ``lamdb.Cursor(db, self)``"""
         return Cursor(db or self._db, self)
 
 
@@ -1649,7 +1649,7 @@ class Cursor(object):
 
         ::
 
-            >>> env = lmdb.open('/tmp/foo')
+            >>> env = lamdb.open('/tmp/foo')
             >>> child_db = env.open_db('child_db')
             >>> with env.begin() as txn:
             ...     cursor = txn.cursor()           # Cursor on main database.
@@ -1934,9 +1934,9 @@ class Cursor(object):
         duplicates, the cursor is positioned on the first value ("duplicate").
 
         Equivalent to `mdb_cursor_get()
-        <http://lmdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
         with `MDB_FIRST
-        <http://lmdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
         """
         return self._cursor_get(_lib.MDB_FIRST)
 
@@ -1947,9 +1947,9 @@ class Cursor(object):
         Only meaningful for databases opened with `dupsort=True`.
 
         Equivalent to `mdb_cursor_get()
-        <http://lmdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
         with `MDB_FIRST_DUP
-        <http://lmdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
         """
         return self._cursor_get(_lib.MDB_FIRST_DUP)
 
@@ -1961,9 +1961,9 @@ class Cursor(object):
         duplicates, the cursor is positioned on the last value ("duplicate").
 
         Equivalent to `mdb_cursor_get()
-        <http://lmdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
         with `MDB_LAST
-        <http://lmdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
         """
         return self._cursor_get(_lib.MDB_LAST)
 
@@ -1974,9 +1974,9 @@ class Cursor(object):
         Only meaningful for databases opened with `dupsort=True`.
 
         Equivalent to `mdb_cursor_get()
-        <http://lmdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
         with `MDB_LAST_DUP
-        <http://lmdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
         """
         return self._cursor_get(_lib.MDB_LAST_DUP)
 
@@ -1989,9 +1989,9 @@ class Cursor(object):
         to the previous key.
 
         Equivalent to `mdb_cursor_get()
-        <http://lmdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
         with `MDB_PREV
-        <http://lmdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
         """
         return self._cursor_get(_lib.MDB_PREV)
 
@@ -2003,9 +2003,9 @@ class Cursor(object):
         Only meaningful for databases opened with `dupsort=True`.
 
         Equivalent to `mdb_cursor_get()
-        <http://lmdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
         with `MDB_PREV_DUP
-        <http://lmdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
         """
         return self._cursor_get(_lib.MDB_PREV_DUP)
 
@@ -2016,9 +2016,9 @@ class Cursor(object):
         Only meaningful for databases opened with `dupsort=True`.
 
         Equivalent to `mdb_cursor_get()
-        <http://lmdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
         with `MDB_PREV_NODUP
-        <http://lmdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
         """
         return self._cursor_get(_lib.MDB_PREV_NODUP)
 
@@ -2031,9 +2031,9 @@ class Cursor(object):
         first value of the next key.
 
         Equivalent to `mdb_cursor_get()
-        <http://lmdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
         with `MDB_NEXT
-        <http://lmdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
         """
         return self._cursor_get(_lib.MDB_NEXT)
 
@@ -2044,9 +2044,9 @@ class Cursor(object):
         Only meaningful for databases opened with `dupsort=True`.
 
         Equivalent to `mdb_cursor_get()
-        <http://lmdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
         with `MDB_NEXT_DUP
-        <http://lmdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
         """
         return self._cursor_get(_lib.MDB_NEXT_DUP)
 
@@ -2057,9 +2057,9 @@ class Cursor(object):
         Only meaningful for databases opened with `dupsort=True`.
 
         Equivalent to `mdb_cursor_get()
-        <http://lmdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
         with `MDB_NEXT_NODUP
-        <http://lmdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
         """
         return self._cursor_get(_lib.MDB_NEXT_NODUP)
 
@@ -2072,9 +2072,9 @@ class Cursor(object):
         ("duplicate") for the key.
 
         Equivalent to `mdb_cursor_get()
-        <http://lmdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
         with `MDB_SET_KEY
-        <http://lmdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
         """
         return self._cursor_get_kv(_lib.MDB_SET_KEY, key, EMPTY_BYTES)
 
@@ -2086,9 +2086,9 @@ class Cursor(object):
         Only meaningful for databases opened with `dupsort=True`.
 
         Equivalent to `mdb_cursor_get()
-        <http://lmdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
         with `MDB_GET_BOTH
-        <http://lmdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
         """
         return self._cursor_get_kv(_lib.MDB_GET_BOTH, key, value)
 
@@ -2189,9 +2189,9 @@ class Cursor(object):
         ("duplicate") for the key.
 
         Equivalent to `mdb_cursor_get()
-        <http://lmdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
         with `MDB_SET_RANGE
-        <http://lmdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
         """
         if not key:
             return self.first()
@@ -2205,9 +2205,9 @@ class Cursor(object):
         Only meaningful for databases opened with `dupsort=True`.
 
         Equivalent to `mdb_cursor_get()
-        <http://lmdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga48df35fb102536b32dfbb801a47b4cb0>`_
         with `MDB_GET_BOTH_RANGE
-        <http://lmdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga1206b2af8b95e7f6b0ef6b28708c9127>`_
         """
         rc = self._cursor_get_kv(_lib.MDB_GET_BOTH_RANGE, key, value)
         # issue #126: MDB_GET_BOTH_RANGE does not satisfy its documentation,
@@ -2225,7 +2225,7 @@ class Cursor(object):
         meaningful for databases opened with `dupsort=True`.
 
         Equivalent to `mdb_cursor_del()
-        <http://lmdb.tech/doc/group__mdb.html#ga26a52d3efcfd72e5bf6bd6960bf75f95>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga26a52d3efcfd72e5bf6bd6960bf75f95>`_
         """
         v = self._valid
         if v:
@@ -2244,7 +2244,7 @@ class Cursor(object):
         Only meaningful for databases opened with `dupsort=True`.
 
         Equivalent to `mdb_cursor_count()
-        <http://lmdb.tech/doc/group__mdb.html#ga4041fd1e1862c6b7d5f10590b86ffbe2>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga4041fd1e1862c6b7d5f10590b86ffbe2>`_
         """
         countp = _ffi.new('size_t *')
         rc = _lib.mdb_cursor_count(self._cur, countp)
@@ -2258,7 +2258,7 @@ class Cursor(object):
         success, the cursor is positioned on the key.
 
         Equivalent to `mdb_cursor_put()
-        <http://lmdb.tech/doc/group__mdb.html#ga1f83ccb40011837ff37cc32be01ad91e>`_
+        <http://lamdb.tech/doc/group__mdb.html#ga1f83ccb40011837ff37cc32be01ad91e>`_
 
             `key`:
                 Bytestring key to store.

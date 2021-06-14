@@ -1,4 +1,4 @@
-# Copyright 2013-2021 The py-lmdb authors, all rights reserved.
+# Copyright 2013-2021 The py-lamdb authors, all rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted only as authorized by the OpenLDAP
@@ -21,7 +21,7 @@
 """
 Python wrapper for OpenLDAP's "Lightning" MDB database.
 
-Please see https://lmdb.readthedocs.io/
+Please see https://lamdb.readthedocs.io/
 """
 
 import os
@@ -39,15 +39,15 @@ def _reading_docs():
 try:
     if _reading_docs() or os.getenv('LMDB_FORCE_CFFI') is not None:
         raise ImportError
-    from lmdb.cpython import *
-    from lmdb.cpython import open
-    from lmdb.cpython import __all__
+    from lamdb.cpython import *
+    from lamdb.cpython import open
+    from lamdb.cpython import __all__
 except ImportError:
     if (not _reading_docs()) and os.getenv('LMDB_FORCE_CPYTHON') is not None:
         raise
-    from lmdb.cffi import *
-    from lmdb.cffi import open
-    from lmdb.cffi import __all__
-    from lmdb.cffi import __doc__
+    from lamdb.cffi import *
+    from lamdb.cffi import open
+    from lamdb.cffi import __all__
+    from lamdb.cffi import __doc__
 
 __version__ = '1.2.1'

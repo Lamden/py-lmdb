@@ -1,5 +1,5 @@
 #
-# Copyright 2013-2020 The py-lmdb authors, all rights reserved.
+# Copyright 2013-2020 The py-lamdb authors, all rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted only as authorized by the OpenLDAP
@@ -46,7 +46,7 @@ if os.getenv('LMDB_FORCE_CFFI') is not None:
     use_cpython = False
 
 if sys.version[:3] < '2.7' or (3, 0) < sys.version_info[:2] < (3, 4):
-    sys.stderr.write('Error: py-lmdb requires at least CPython 2.7 or 3.4\n')
+    sys.stderr.write('Error: lamdb requires at least CPython 2.7 or 3.4\n')
     raise SystemExit(1)
 
 #
@@ -69,17 +69,17 @@ extra_compile_args = []
 patch_lmdb_source = False
 
 if os.getenv('LMDB_FORCE_SYSTEM') is not None:
-    print('py-lmdb: Using system version of liblmdb.')
+    print('lamdb: Using system version of liblmdb.')
     extra_sources = []
     extra_include_dirs += []
-    libraries = ['lmdb']
+    libraries = ['lamdb']
 elif os.getenv('LMDB_PURE') is not None:
-    print('py-lmdb: Using bundled unmodified liblmdb; override with LMDB_FORCE_SYSTEM=1.')
+    print('lamdb: Using bundled unmodified liblmdb; override with LMDB_FORCE_SYSTEM=1.')
     extra_sources = ['lib/mdb.c', 'lib/midl.c']
     extra_include_dirs += ['lib']
     libraries = []
 else:
-    print('py-lmdb: Using bundled liblmdb with py-lmdb patches; override with LMDB_FORCE_SYSTEM=1 or LMDB_PURE=1.')
+    print('lamdb: Using bundled liblmdb with lamdb patches; override with LMDB_FORCE_SYSTEM=1 or LMDB_PURE=1.')
     extra_sources = ['build/lib/mdb.c', 'build/lib/midl.c']
     extra_include_dirs += ['build/lib']
     extra_compile_args += ['-DHAVE_PATCHED_LMDB=1']
@@ -91,7 +91,7 @@ if patch_lmdb_source:
         try:
             import patch_ng as patch
         except ImportError:
-            raise Exception('Building py-lmdb from source on Windows requires the "patch-ng" python module.')
+            raise Exception('Building lamdb from source on Windows requires the "patch-ng" python module.')
 
     # Clean out any previously patched files
     dest = 'build' + os.sep + 'lib'
@@ -106,7 +106,7 @@ if patch_lmdb_source:
         pass
     shutil.copytree('lib', dest)
 
-    # Copy away the lmdb source then patch it
+    # Copy away the lamdb source then patch it
     if sys.platform.startswith('win'):
         patchfile = 'lib' + os.sep + 'py-lmdb' + os.sep + 'env-copy-txn.patch'
         patchset = patch.fromfile(patchfile)
@@ -149,7 +149,7 @@ if sys.platform.startswith('win'):
 # configuration may differ, forcing a recompile (and therefore likely compile
 # errors). This happens even when `use_cpython` since user might want to
 # LMDB_FORCE_CFFI=1 during testing.
-with open('lmdb/_config.py', 'w') as fp:
+with open('lamdb/_config.py', 'w') as fp:
     fp.write('CONFIG = dict(%r)\n\n' % ((
         ('extra_compile_args', extra_compile_args),
         ('extra_sources', extra_sources),
@@ -160,14 +160,14 @@ with open('lmdb/_config.py', 'w') as fp:
 
 
 if use_cpython:
-    print('py-lmdb: Using CPython extension; override with LMDB_FORCE_CFFI=1.')
+    print('lamdb: Using CPython extension; override with LMDB_FORCE_CFFI=1.')
     install_requires = []
     if memsink:
         extra_compile_args += ['-DHAVE_MEMSINK',
                                '-I' + os.path.dirname(memsink.__file__)]
     ext_modules = [Extension(
         name='cpython',
-        sources=['lmdb/cpython.c'] + extra_sources,
+        sources=['lamdb/cpython.c'] + extra_sources,
         extra_compile_args=extra_compile_args,
         libraries=libraries,
         include_dirs=extra_include_dirs,
@@ -177,30 +177,30 @@ else:
     print('Using cffi extension.')
     install_requires = ['cffi>=0.8']
     try:
-        import lmdb.cffi
-        ext_modules = [lmdb.cffi._ffi.verifier.get_extension()]
+        import lamdb.cffi
+        ext_modules = [lamdb.cffi._ffi.verifier.get_extension()]
     except ImportError:
-        sys.stderr.write('Could not import lmdb; ensure cffi is installed!\n')
+        sys.stderr.write('Could not import lamdb; ensure cffi is installed!\n')
         ext_modules = []
 
 def grep_version():
-    path = os.path.join(os.path.dirname(__file__), 'lmdb/__init__.py')
+    path = os.path.join(os.path.dirname(__file__), 'lamdb/__init__.py')
     with open(path) as fp:
         for line in fp:
             if line.startswith('__version__'):
                 return eval(line.split()[-1])
 
 setup(
-    name='lmdb',
+    name='lamdb',
     version=grep_version(),
-    description="Universal Python binding for the LMDB 'Lightning' Database",
-    long_description="Universal Python binding for the LMDB 'Lightning' Database",
+    description="Modified LMDB to support larger keys and pages.",
+    long_description="Modified LMDB to support larger keys and pages.",
     long_description_content_type="text/plain",
     author='David Wilson',
     maintainer='Nic Watson',
     license='OpenLDAP BSD',
-    url='http://github.com/jnwatson/py-lmdb/',
-    packages=['lmdb'],
+    url='http://github.com/lamden/py-lmdb/',
+    packages=['lamdb'],
 
     classifiers=[
         "Programming Language :: Python",
@@ -218,7 +218,7 @@ setup(
         "Topic :: Database",
         "Topic :: Database :: Database Engines/Servers",
     ],
-    ext_package='lmdb',
+    ext_package='lamdb',
     ext_modules=ext_modules,
     install_requires=install_requires,
 )

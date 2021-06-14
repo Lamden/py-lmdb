@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# lmdb documentation build configuration file, created by
+# lamdb documentation build configuration file, created by
 # sphinx-quickstart on Tue Feb  5 00:39:26 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -42,7 +42,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'lmdb'
+project = u'lamdb'
 copyright = u'2013-2019 David Wilson, 2019-2020 Nic Watson'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -51,7 +51,7 @@ copyright = u'2013-2019 David Wilson, 2019-2020 Nic Watson'
 #
 
 def grep_version():
-    path = os.path.join(os.path.dirname(__file__), '../lmdb/__init__.py')
+    path = os.path.join(os.path.dirname(__file__), '../lamdb/__init__.py')
     with open(path) as fp:
         for line in fp:
             if line.startswith('__version__'):
@@ -107,7 +107,7 @@ html_theme = 'acid'
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    'github_repo': 'https://github.com/jnwatson/py-lmdb/'
+    'github_repo': 'https://github.com/jnwatson/py-lamdb/'
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -195,7 +195,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'lmdb.tex', u'lmdb Documentation',
+  ('index', 'lamdb.tex', u'lamdb Documentation',
    u'David Wilson and Nic Watson', 'manual'),
 ]
 
@@ -225,7 +225,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'lmdb', u'lmdb Documentation',
+    ('index', 'lamdb', u'lamdb Documentation',
      [u'David Wilson'], 1)
 ]
 
@@ -239,8 +239,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'lmdb', u'lmdb Documentation',
-   u'David Wilson', 'lmdb', 'One line description of project.',
+  ('index', 'lamdb', u'lamdb Documentation',
+   u'David Wilson', 'lamdb', 'One line description of project.',
    'Miscellaneous'),
 ]
 

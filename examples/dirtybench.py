@@ -10,7 +10,7 @@ import tempfile
 
 from time import time as now
 import random
-import lmdb
+import lamdb
 
 MAP_SIZE = 1048576 * 400
 DB_PATH = '/ram/testdb'
@@ -36,7 +36,7 @@ def reopen_env(**kwargs):
         env.close()
     if os.path.exists(DB_PATH):
         shutil.rmtree(DB_PATH)
-    return lmdb.open(DB_PATH, map_size=MAP_SIZE, writemap=USE_SPARSE_FILES, **kwargs)
+    return lamdb.open(DB_PATH, map_size=MAP_SIZE, writemap=USE_SPARSE_FILES, **kwargs)
 
 
 def case(title, **params):

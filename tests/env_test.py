@@ -1,5 +1,5 @@
 #
-# Copyright 2013 The py-lmdb authors, all rights reserved.
+# Copyright 2013 The py-lamdb authors, all rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted only as authorized by the OpenLDAP
@@ -33,10 +33,10 @@ from testlib import OCT
 from testlib import INT_TYPES
 from testlib import UnicodeType
 
-import lmdb
+import lamdb
 
 # Whether we have the patch that allows env.copy* to take a txn
-have_txn_patch = lmdb.version(subpatch=True)[3]
+have_txn_patch = lamdb.version(subpatch=True)[3]
 
 NO_READERS = UnicodeType('(no active readers)\n')
 
@@ -51,13 +51,13 @@ class VersionTest(unittest.TestCase):
         testlib.cleanup()
 
     def test_version(self):
-        ver = lmdb.version()
+        ver = lamdb.version()
         assert len(ver) == 3
         assert all(isinstance(i, INT_TYPES) for i in ver)
         assert all(i >= 0 for i in ver)
 
     def test_version_subpatch(self):
-        ver = lmdb.version(subpatch=True)
+        ver = lamdb.version(subpatch=True)
         assert len(ver) == 4
         assert all(isinstance(i, INT_TYPES) for i in ver)
         assert all(i >= 0 for i in ver)
@@ -68,9 +68,9 @@ class OpenTest(unittest.TestCase):
 
     def test_bad_paths(self):
         self.assertRaises(Exception,
-            lambda: lmdb.open('/doesnt/exist/at/all'))
+                          lambda: lamdb.open('/doesnt/exist/at/all'))
         self.assertRaises(Exception,
-            lambda: lmdb.open(testlib.temp_file()))
+                          lambda: lamdb.open(testlib.temp_file()))
 
     def test_ok_path(self):
         path, env = testlib.temp_env()
@@ -88,15 +88,15 @@ class OpenTest(unittest.TestCase):
         def txn():
             with env.begin(write=True) as txn:
                 txn.put(B('a'), B('a'))
-        self.assertRaises(lmdb.MapFullError, txn)
+        self.assertRaises(lamdb.MapFullError, txn)
 
     def test_subdir_false_junk(self):
         path = testlib.temp_file()
         fp = open(path, 'wb')
         fp.write(B('A' * 8192))
         fp.close()
-        self.assertRaises(lmdb.InvalidError,
-            lambda: lmdb.open(path, subdir=False))
+        self.assertRaises(lamdb.InvalidError,
+                          lambda: lamdb.open(path, subdir=False))
 
     def test_subdir_false_ok(self):
         path = testlib.temp_file(create=False)
@@ -108,8 +108,8 @@ class OpenTest(unittest.TestCase):
 
     def test_subdir_true_noexist_nocreate(self):
         path = testlib.temp_dir(create=False)
-        self.assertRaises(lmdb.Error,
-            lambda: testlib.temp_env(path, subdir=True, create=False))
+        self.assertRaises(lamdb.Error,
+                          lambda: testlib.temp_env(path, subdir=True, create=False))
         assert not os.path.exists(path)
 
     def test_subdir_true_noexist_create(self):
@@ -120,11 +120,11 @@ class OpenTest(unittest.TestCase):
 
     def test_subdir_true_exist_nocreate(self):
         path, env = testlib.temp_env()
-        assert lmdb.open(path, subdir=True, create=False).path() == path
+        assert lamdb.open(path, subdir=True, create=False).path() == path
 
     def test_subdir_true_exist_create(self):
         path, env = testlib.temp_env()
-        assert lmdb.open(path, subdir=True, create=True).path() == path
+        assert lamdb.open(path, subdir=True, create=True).path() == path
 
     def test_readonly_false(self):
         path, env = testlib.temp_env(readonly=False)
@@ -137,18 +137,18 @@ class OpenTest(unittest.TestCase):
     def test_readonly_true_noexist(self):
         path = testlib.temp_dir(create=False)
         # Open readonly missing store should fail.
-        self.assertRaises(lmdb.Error,
-            lambda: lmdb.open(path, readonly=True, create=True))
+        self.assertRaises(lamdb.Error,
+                          lambda: lamdb.open(path, readonly=True, create=True))
         # And create=True should not have mkdir'd it.
         assert not os.path.exists(path)
 
     def test_readonly_true_exist(self):
         path, env = testlib.temp_env()
-        env2 = lmdb.open(path, readonly=True)
+        env2 = lamdb.open(path, readonly=True)
         assert env2.path() == path
         # Attempting a write txn should fail.
-        self.assertRaises(lmdb.ReadonlyError,
-            lambda: env2.begin(write=True))
+        self.assertRaises(lamdb.ReadonlyError,
+                          lambda: env2.begin(write=True))
         # Flag should be set.
         assert env2.flags()['readonly']
 
@@ -176,14 +176,14 @@ class OpenTest(unittest.TestCase):
 
     def test_mode_subdir_create(self):
         if sys.platform == 'win32':
-            # Mode argument is ignored on Windows; see lmdb.h
+            # Mode argument is ignored on Windows; see lamdb.h
             return
 
         oldmask = os.umask(0)
         try:
             for mode in OCT('777'), OCT('755'), OCT('700'):
                 path = testlib.temp_dir(create=False)
-                env = lmdb.open(path, subdir=True, create=True, mode=mode)
+                env = lamdb.open(path, subdir=True, create=True, mode=mode)
                 fmode = mode & ~OCT('111')
                 assert testlib.path_mode(path) == mode
                 assert testlib.path_mode(path+'/data.mdb') == fmode
@@ -193,14 +193,14 @@ class OpenTest(unittest.TestCase):
 
     def test_mode_subdir_nocreate(self):
         if sys.platform == 'win32':
-            # Mode argument is ignored on Windows; see lmdb.h
+            # Mode argument is ignored on Windows; see lamdb.h
             return
 
         oldmask = os.umask(0)
         try:
             for mode in OCT('777'), OCT('755'), OCT('700'):
                 path = testlib.temp_dir()
-                env = lmdb.open(path, subdir=True, create=False, mode=mode)
+                env = lamdb.open(path, subdir=True, create=False, mode=mode)
                 fmode = mode & ~OCT('111')
                 assert testlib.path_mode(path+'/data.mdb') == fmode
                 assert testlib.path_mode(path+'/lock.mdb') == fmode
@@ -223,8 +223,8 @@ class OpenTest(unittest.TestCase):
             assert env.flags()['meminit'] == flag
 
     def test_max_readers(self):
-        self.assertRaises(lmdb.InvalidParameterError,
-            lambda: testlib.temp_env(max_readers=0))
+        self.assertRaises(lamdb.InvalidParameterError,
+                          lambda: testlib.temp_env(max_readers=0))
         for val in 123, 234:
             _, env = testlib.temp_env(max_readers=val)
             assert env.info()['max_readers'] == val
@@ -235,8 +235,8 @@ class OpenTest(unittest.TestCase):
         for val in 0, 10, 20:
             _, env = testlib.temp_env(max_dbs=val)
             dbs = [env.open_db(B('db%d' % i)) for i in range(val)]
-            self.assertRaises(lmdb.DbsFullError,
-                lambda: env.open_db(B('toomany')))
+            self.assertRaises(lamdb.DbsFullError,
+                              lambda: env.open_db(B('toomany')))
 
 
 class SetMapSizeTest(unittest.TestCase):
@@ -433,7 +433,7 @@ class OtherMethodsTest(unittest.TestCase):
         env.copy(dest_dir, compact=True)
         assert os.path.exists(dest_dir + '/data.mdb')
 
-        cenv = lmdb.open(dest_dir)
+        cenv = lamdb.open(dest_dir)
         ctxn = cenv.begin()
         assert ctxn.get(B('a')) == B('b')
 
@@ -451,7 +451,7 @@ class OtherMethodsTest(unittest.TestCase):
         env.copy(dest_dir, compact=True)
         assert os.path.exists(dest_dir + '/data.mdb')
 
-        cenv = lmdb.open(dest_dir)
+        cenv = lamdb.open(dest_dir)
         ctxn = cenv.begin()
         assert ctxn.get(B('a')) == B('b')
 
@@ -467,7 +467,7 @@ class OtherMethodsTest(unittest.TestCase):
             env.copy(dest_dir, compact=True, txn=copy_txn)
             assert os.path.exists(dest_dir + '/data.mdb')
 
-            cenv = lmdb.open(dest_dir)
+            cenv = lamdb.open(dest_dir)
             ctxn = cenv.begin()
             assert ctxn.get(B('a')) == B('b')
             # Verify that the write that occurred outside the txn isn't seen in the
@@ -492,7 +492,7 @@ class OtherMethodsTest(unittest.TestCase):
         fp = open(dst_path, 'wb')
         env.copyfd(fp.fileno())
 
-        dstenv = lmdb.open(dst_path, subdir=False)
+        dstenv = lamdb.open(dst_path, subdir=False)
         dtxn = dstenv.begin()
         assert dtxn.get(B('a')) == B('b')
         fp.close()
@@ -509,7 +509,7 @@ class OtherMethodsTest(unittest.TestCase):
 
             env.copyfd(fp.fileno(), compact=True, txn=copy_txn)
 
-            dstenv = lmdb.open(dst_path, subdir=False)
+            dstenv = lamdb.open(dst_path, subdir=False)
             dtxn = dstenv.begin()
             assert dtxn.get(B('a')) == B('b')
             # Verify that the write that occurred outside the txn isn't seen in the
@@ -541,7 +541,7 @@ class OtherMethodsTest(unittest.TestCase):
                                   lambda: env.copyfd(fp.fileno(), txn=txn))
         env.copyfd(fp.fileno())
 
-        dstenv = lmdb.open(dst_path, subdir=False)
+        dstenv = lamdb.open(dst_path, subdir=False)
         dtxn = dstenv.begin()
         assert dtxn.get(B('a')) == B('b')
 
@@ -562,13 +562,13 @@ class OtherMethodsTest(unittest.TestCase):
     def _test_reader_check_child(path):
         """Function to run in child process since we can't use fork() on
         win32."""
-        env = lmdb.open(path, max_spare_txns=0)
+        env = lamdb.open(path, max_spare_txns=0)
         txn = env.begin()
         os._exit(0)
 
     def test_reader_check(self):
         if sys.platform == 'win32':
-            # Stale writers are cleared automatically on Windows, see lmdb.h
+            # Stale writers are cleared automatically on Windows, see lamdb.h
             return
 
         path, env = testlib.temp_env(max_spare_txns=0)
@@ -579,7 +579,7 @@ class OtherMethodsTest(unittest.TestCase):
         # reset for a read-only txn, the actual abort doesn't happen until
         # __del__, when Transaction discovers there is no room for it on the
         # freelist.
-        env1 = lmdb.open(path)
+        env1 = lamdb.open(path)
         txn1 = env1.begin()
         assert env.readers() != NO_READERS
         assert env.reader_check() == 0
@@ -616,8 +616,8 @@ class BeginTest(unittest.TestCase):
         _, env = testlib.temp_env()
         txn = env.begin()
         # Read txn can't write.
-        self.assertRaises(lmdb.ReadonlyError,
-            lambda: txn.put(B('a'), B('')))
+        self.assertRaises(lamdb.ReadonlyError,
+                          lambda: txn.put(B('a'), B('')))
         txn.abort()
 
     def test_begin_write(self):
@@ -649,8 +649,8 @@ class BeginTest(unittest.TestCase):
         _, env = testlib.temp_env()
         parent = env.begin()
         # Nonsensical.
-        self.assertRaises(lmdb.InvalidParameterError,
-            lambda: env.begin(parent=parent))
+        self.assertRaises(lamdb.InvalidParameterError,
+                          lambda: env.begin(parent=parent))
 
     def test_parent(self):
         _, env = testlib.temp_env()
@@ -728,8 +728,8 @@ class OpenDbTest(unittest.TestCase):
     def test_sub_rotxn(self):
         _, env = testlib.temp_env()
         txn = env.begin(write=False)
-        self.assertRaises(lmdb.ReadonlyError,
-            lambda: env.open_db(B('subdb'), txn=txn))
+        self.assertRaises(lamdb.ReadonlyError,
+                          lambda: env.open_db(B('subdb'), txn=txn))
 
     def test_sub_txn(self):
         _, env = testlib.temp_env()
@@ -750,7 +750,7 @@ class OpenDbTest(unittest.TestCase):
         path, env = testlib.temp_env()
         db1 = env.open_db(B('subdb1'))
         env.close()
-        env = lmdb.open(path, max_dbs=10)
+        env = lamdb.open(path, max_dbs=10)
         db1 = env.open_db(B('subdb1'))
 
     FLAG_SETS = [
@@ -776,7 +776,7 @@ class OpenDbTest(unittest.TestCase):
         txn.commit()
         # Test flag persistence.
         env.close()
-        env = lmdb.open(path, max_dbs=10)
+        env = lamdb.open(path, max_dbs=10)
         txn = env.begin(write=True)
 
         for flag, val in self.FLAG_SETS:
@@ -788,7 +788,7 @@ class OpenDbTest(unittest.TestCase):
         path, env = testlib.temp_env()
         env.close()
 
-        env = lmdb.open(path, readonly=True)
+        env = lamdb.open(path, readonly=True)
         db = env.open_db(None)
 
     def test_readonly_env_sub_noexist(self):
@@ -796,18 +796,18 @@ class OpenDbTest(unittest.TestCase):
         path, env = testlib.temp_env()
         env.close()
 
-        env = lmdb.open(path, max_dbs=10, readonly=True)
-        self.assertRaises(lmdb.NotFoundError,
-            lambda: env.open_db(B('node_schedules'), create=False))
+        env = lamdb.open(path, max_dbs=10, readonly=True)
+        self.assertRaises(lamdb.NotFoundError,
+                          lambda: env.open_db(B('node_schedules'), create=False))
 
     def test_readonly_env_sub_eperm(self):
         # https://github.com/dw/py-lmdb/issues/109
         path, env = testlib.temp_env()
         env.close()
 
-        env = lmdb.open(path, max_dbs=10, readonly=True)
-        self.assertRaises(lmdb.ReadonlyError,
-            lambda: env.open_db(B('node_schedules'), create=True))
+        env = lamdb.open(path, max_dbs=10, readonly=True)
+        self.assertRaises(lamdb.ReadonlyError,
+                          lambda: env.open_db(B('node_schedules'), create=True))
 
     def test_readonly_env_sub(self):
         # https://github.com/dw/py-lmdb/issues/109
@@ -815,7 +815,7 @@ class OpenDbTest(unittest.TestCase):
         assert env.open_db(B('node_schedules')) is not None
         env.close()
 
-        env = lmdb.open(path, max_dbs=10, readonly=True)
+        env = lamdb.open(path, max_dbs=10, readonly=True)
         db = env.open_db(B('node_schedules'), create=False)
         assert db is not None
 
@@ -877,7 +877,7 @@ class LeakTest(unittest.TestCase):
 
     def test_open_unref_does_not_leak(self):
         temp_dir = testlib.temp_dir()
-        env = lmdb.open(temp_dir)
+        env = lamdb.open(temp_dir)
         ref = weakref.ref(env)
         env = None
         testlib.debug_collect()
@@ -885,7 +885,7 @@ class LeakTest(unittest.TestCase):
 
     def test_open_close_does_not_leak(self):
         temp_dir = testlib.temp_dir()
-        env = lmdb.open(temp_dir)
+        env = lamdb.open(temp_dir)
         env.close()
         ref = weakref.ref(env)
         env = None
@@ -894,7 +894,7 @@ class LeakTest(unittest.TestCase):
 
     def test_weakref_callback_invoked_once(self):
         temp_dir = testlib.temp_dir()
-        env = lmdb.open(temp_dir)
+        env = lamdb.open(temp_dir)
         env.close()
         count = [0]
         def callback(ref):

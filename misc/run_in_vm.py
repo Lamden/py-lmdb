@@ -1,5 +1,5 @@
 #
-# Copyright 2014 The py-lmdb authors, all rights reserved.
+# Copyright 2014 The py-lamdb authors, all rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted only as authorized by the OpenLDAP

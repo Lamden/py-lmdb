@@ -1,5 +1,5 @@
 #
-# Copyright 2013 The py-lmdb authors, all rights reserved.
+# Copyright 2013 The py-lamdb authors, all rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted only as authorized by the OpenLDAP
@@ -36,7 +36,7 @@ try:
 except ImportError:
     import builtins as __builtin__
 
-import lmdb
+import lamdb
 
 _cleanups = []
 
@@ -83,7 +83,7 @@ def temp_file(create=True):
 def temp_env(path=None, max_dbs=10, **kwargs):
     if not path:
         path = temp_dir()
-    env = lmdb.open(path, max_dbs=max_dbs, **kwargs)
+    env = lamdb.open(path, max_dbs=max_dbs, **kwargs)
     _cleanups.append(env.close)
     return path, env
 

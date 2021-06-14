@@ -1,4 +1,4 @@
-# Copyright 2013 The py-lmdb authors, all rights reserved.
+# Copyright 2013 The py-lamdb authors, all rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted only as authorized by the OpenLDAP
@@ -20,5 +20,5 @@
 
 # Hack to support Python >=v2.6 'pythom -mlmdb'
 from __future__ import absolute_import
-import lmdb.tool
-lmdb.tool.main()
+import lamdb.tool
+lamdb.tool.main()

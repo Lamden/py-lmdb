@@ -1,5 +1,5 @@
 #
-# Copyright 2013-2021 The py-lmdb authors, all rights reserved.
+# Copyright 2013-2021 The py-lamdb authors, all rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted only as authorized by the OpenLDAP
@@ -21,7 +21,7 @@
 #
 
 # This is not a test suite! More like a collection of triggers for previously
-# observed crashes. Want to contribute to py-lmdb? Please write a test suite!
+# observed crashes. Want to contribute to py-lamdb? Please write a test suite!
 #
 # what happens when empty keys/ values passed to various funcs
 # incorrect types
@@ -38,7 +38,7 @@ import random
 import unittest
 import multiprocessing
 
-import lmdb
+import lamdb
 import testlib
 
 from testlib import B
@@ -198,7 +198,7 @@ class TxnFullTest(unittest.TestCase):
             try:
                 with env.begin(write=True) as txn:
                     txn.put(B(str(i)), B(str(i)))
-            except lmdb.MapFullError:
+            except lamdb.MapFullError:
                 break
 
         # Should not crash with MDB_BAD_TXN:
@@ -274,11 +274,11 @@ class BadCursorTest(unittest.TestCase):
         env.close()
         del env
 
-        env = lmdb.open(path, readonly=True, max_dbs=4)
+        env = lamdb.open(path, readonly=True, max_dbs=4)
         txn1 = env.begin(write=False)
         db = env.open_db(b'db', dupsort=True, txn=txn1)
         txn2 = env.begin(write=False)
-        self.assertRaises(lmdb.InvalidParameterError, txn2.cursor, db=db)
+        self.assertRaises(lamdb.InvalidParameterError, txn2.cursor, db=db)
 
 MINDBSIZE = 64 * 1024 * 2  # certain ppcle Linux distros have a 64K page size
 
@@ -294,7 +294,7 @@ if sys.version_info[:2] >= (3, 4):
             Increase map size and fill up database, making sure that the root page is no longer
             accessible in the main process.
             '''
-            with lmdb.open(path, max_dbs=10, create=False, map_size=MINDBSIZE) as env:
+            with lamdb.open(path, max_dbs=10, create=False, map_size=MINDBSIZE) as env:
                 env.open_db(b'foo')
                 env.set_mapsize(MINDBSIZE * 2)
                 count = 0
@@ -306,7 +306,7 @@ if sys.version_info[:2] >= (3, 4):
                             txn.put(datum, b'0')
                             count += 1
 
-                except lmdb.MapFullError:
+                except lamdb.MapFullError:
                     # Now put (and commit) just short of that
                     with env.begin(write=True) as txn:
                         for i in range(count - 100):
@@ -324,12 +324,12 @@ if sys.version_info[:2] >= (3, 4):
             mpctx = multiprocessing.get_context('spawn')
             path, env = testlib.temp_env(max_dbs=10, map_size=MINDBSIZE)
             env.close()
-            env = lmdb.open(path, max_dbs=10, map_size=MINDBSIZE, readonly=True)
+            env = lamdb.open(path, max_dbs=10, map_size=MINDBSIZE, readonly=True)
             proc = mpctx.Process(target=self.do_resize, args=(path,))
             proc.start()
             proc.join(5)
             assert proc.exitcode is not None
-            self.assertRaises(lmdb.MapResizedError, env.open_db, b'foo')
+            self.assertRaises(lamdb.MapResizedError, env.open_db, b'foo')
 
 if __name__ == '__main__':
     unittest.main()

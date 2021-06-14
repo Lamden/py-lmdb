@@ -1,5 +1,5 @@
 #
-# Copyright 2013-2021 The py-lmdb authors, all rights reserved.
+# Copyright 2013-2021 The py-lamdb authors, all rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted only as authorized by the OpenLDAP
@@ -27,7 +27,7 @@ from __future__ import with_statement
 import sys
 import unittest
 
-import lmdb
+import lamdb
 
 import testlib
 from testlib import B
@@ -321,7 +321,7 @@ class CursorReadOnlyTest(unittest.TestCase):
         path, env = testlib.temp_env(max_dbs=10)
         env.open_db(b'foo')
         env.close()
-        with lmdb.open(path, max_dbs=10, readonly=True) as env:
+        with lamdb.open(path, max_dbs=10, readonly=True) as env:
             db2 = env.open_db(b'foo')
             with env.begin(db=db2) as txn:
                 with txn.cursor(db=db2):

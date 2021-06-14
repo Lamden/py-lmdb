@@ -1,5 +1,5 @@
 #
-# Copyright 2013 The py-lmdb authors, all rights reserved.
+# Copyright 2013 The py-lamdb authors, all rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted only as authorized by the OpenLDAP
@@ -26,8 +26,8 @@ import sys
 import shlex
 import unittest
 
-import lmdb
-import lmdb.tool
+import lamdb
+import lamdb.tool
 import testlib
 
 def call_tool(cmdline):
@@ -35,7 +35,7 @@ def call_tool(cmdline):
         args = cmdline.split()
     else:
         args = shlex.split(cmdline)
-    return lmdb.tool.main(args)
+    return lamdb.tool.main(args)
 
 class ToolTest(testlib.LmdbTest):
     def test_cmd_get(self):

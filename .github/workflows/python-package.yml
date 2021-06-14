@@ -1,5 +1,5 @@
 ---
-name: Build, run, and test py-lmdb
+name: Build, run, and test py-lamdb
 
 'on':
   push:
@@ -38,7 +38,7 @@ jobs:
 
         include:
           - python-version: 3.9
-            os: ubuntu-20.04  # Under ubuntu-18.04 system purity, pytest will segfault due to old (0.9.21) lmdb
+            os: ubuntu-20.04  # Under ubuntu-18.04 system purity, pytest will segfault due to old (0.9.21) lamdb
             impl: cpython
             purity: system
 
@@ -113,7 +113,7 @@ jobs:
         with:
           name: "${{ matrix.os }}-${{ matrix.python-version }}-\
             ${{ matrix.impl }}-${{ matrix.purity }}.whl"
-          path: dist/lmdb-*.whl
+          path: dist/lamdb-*.whl
 
       - name: Get version
         if: >-
@@ -140,7 +140,7 @@ jobs:
 
         uses: actions/upload-artifact@v2
         with:
-          path: dist/lmdb*.tar.gz
+          path: dist/lamdb*.tar.gz
           name: source
 
       - name: Build manylinux wheel
@@ -164,7 +164,7 @@ jobs:
           matrix.purity == 'with-pylmdb-mods' && matrix.impl == 'cpython'
         uses: actions/upload-artifact@v2
         with:
-          path: dist/lmdb*manylinux*.whl
+          path: dist/lamdb*manylinux*.whl
           name: manylinux
 
   test_build_aarch64:
@@ -218,7 +218,7 @@ jobs:
         with:
           name: "${{ runner.os }}-${{ matrix.PYTHON }}-\
             ${{ matrix.impl }}-${{ matrix.purity }}.whl"
-          path: dist/lmdb-*.whl
+          path: dist/lamdb-*.whl
           
       - uses: actions/upload-artifact@v2
         if: \[ ${{ matrix.PYTHON }} == cp39-cp39 \] && \[ ${{ runner.os }} == 'Linux' \] && \[ ${{ matrix.purity }} == 'with-pylmdb-mods' \] && \[ ${{ matrix.impl }} == 'cpython' \]
@@ -228,7 +228,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: \[ ${{ matrix.PYTHON }} == cp39-cp39 \] && \[ ${{ runner.os }} == 'Linux' \] && \[ ${{ matrix.purity }} == 'with-pylmdb-mods' \] && \[ ${{ matrix.impl }} == 'cpython' \]
         with:
-          path: dist/lmdb*.tar.gz
+          path: dist/lamdb*.tar.gz
           name: source        
       - uses: RalfG/python-wheels-manylinux-build@v0.3.3-manylinux2014_aarch64
         if: \[ ${{ matrix.PYTHON }} == cp39-cp39 \] && \[ ${{ runner.os }} == 'Linux' \] && \[ ${{ matrix.purity }} == 'with-pylmdb-mods' \] && \[ ${{ matrix.impl }} == 'cpython' \]
@@ -239,7 +239,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: \[ ${{ matrix.PYTHON }} == cp39-cp39 \] && \[ ${{ runner.os }} == 'Linux' \] && \[ ${{ matrix.purity }} == 'with-pylmdb-mods' \] && \[ ${{ matrix.impl }} == 'cpython' \]
         with:
-          path: dist/lmdb*manylinux*.whl
+          path: dist/lamdb*manylinux*.whl
           name: manylinux
 
   publish:

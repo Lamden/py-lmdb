@@ -1,5 +1,5 @@
 #
-# Copyright 2013 The py-lmdb authors, all rights reserved.
+# Copyright 2013 The py-lamdb authors, all rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted only as authorized by the OpenLDAP
@@ -31,7 +31,7 @@ from testlib import B
 from testlib import INT_TYPES
 from testlib import BytesType
 
-import lmdb
+import lamdb
 
 
 UINT_0001 = struct.pack('I', 1)
@@ -48,19 +48,19 @@ class InitTest(unittest.TestCase):
         _, env = testlib.temp_env()
         env.close()
         self.assertRaises(Exception,
-            lambda: lmdb.Transaction(env))
+                          lambda: lamdb.Transaction(env))
 
     def test_readonly(self):
         _, env = testlib.temp_env()
-        txn = lmdb.Transaction(env)
+        txn = lamdb.Transaction(env)
         # Read txn can't write.
-        self.assertRaises(lmdb.ReadonlyError,
-            lambda: txn.put(B('a'), B('')))
+        self.assertRaises(lamdb.ReadonlyError,
+                          lambda: txn.put(B('a'), B('')))
         txn.abort()
 
     def test_begin_write(self):
         _, env = testlib.temp_env()
-        txn = lmdb.Transaction(env, write=True)
+        txn = lamdb.Transaction(env, write=True)
         # Write txn can write.
         assert txn.put(B('a'), B(''))
         txn.commit()
@@ -70,12 +70,12 @@ class InitTest(unittest.TestCase):
         main = env.open_db(None)
         sub = env.open_db(B('db1'))
 
-        txn = lmdb.Transaction(env, write=True, db=sub)
+        txn = lamdb.Transaction(env, write=True, db=sub)
         assert txn.put(B('b'), B(''))           # -> sub
         assert txn.put(B('a'), B(''), db=main)  # -> main
         txn.commit()
 
-        txn = lmdb.Transaction(env)
+        txn = lamdb.Transaction(env)
         assert txn.get(B('a')) == B('')
         assert txn.get(B('b')) is None
         assert txn.get(B('a'), db=sub) is None
@@ -86,7 +86,7 @@ class InitTest(unittest.TestCase):
         _, env = testlib.temp_env()
         maindb = env.open_db(None)
         db1 = env.open_db(B('d1'))
-        txn = lmdb.Transaction(env, write=True, db=db1)
+        txn = lamdb.Transaction(env, write=True, db=db1)
         assert txn.put(B('a'), B('d1'))
         assert txn.get(B('a'), db=db1) == B('d1')
         assert txn.get(B('a'), db=maindb) is None
@@ -98,17 +98,17 @@ class InitTest(unittest.TestCase):
 
     def test_parent_readonly(self):
         _, env = testlib.temp_env()
-        parent = lmdb.Transaction(env)
+        parent = lamdb.Transaction(env)
         # Nonsensical.
-        self.assertRaises(lmdb.InvalidParameterError,
-            lambda: lmdb.Transaction(env, parent=parent))
+        self.assertRaises(lamdb.InvalidParameterError,
+                          lambda: lamdb.Transaction(env, parent=parent))
 
     def test_parent(self):
         _, env = testlib.temp_env()
-        parent = lmdb.Transaction(env, write=True)
+        parent = lamdb.Transaction(env, write=True)
         parent.put(B('a'), B('a'))
 
-        child = lmdb.Transaction(env, write=True, parent=parent)
+        child = lamdb.Transaction(env, write=True, parent=parent)
         assert child.get(B('a')) == B('a')
         assert child.put(B('a'), B('b'))
         child.abort()
@@ -116,7 +116,7 @@ class InitTest(unittest.TestCase):
         # put() should have rolled back
         assert parent.get(B('a')) == B('a')
 
-        child = lmdb.Transaction(env, write=True, parent=parent)
+        child = lamdb.Transaction(env, write=True, parent=parent)
         assert child.put(B('a'), B('b'))
         child.commit()
 
@@ -125,7 +125,7 @@ class InitTest(unittest.TestCase):
 
     def test_buffers(self):
         _, env = testlib.temp_env()
-        txn = lmdb.Transaction(env, write=True, buffers=True)
+        txn = lamdb.Transaction(env, write=True, buffers=True)
         assert txn.put(B('a'), B('a'))
         b = txn.get(B('a'))
         assert b is not None
@@ -133,7 +133,7 @@ class InitTest(unittest.TestCase):
         assert not isinstance(b, type(B('')))
         txn.commit()
 
-        txn = lmdb.Transaction(env, buffers=False)
+        txn = lamdb.Transaction(env, buffers=False)
         b = txn.get(B('a'))
         assert b is not None
         assert len(b) == 1
@@ -209,7 +209,7 @@ class StatTest(unittest.TestCase):
         db1 = env.open_db(B('db1'))
         db2 = env.open_db(B('db2'))
 
-        txn = lmdb.Transaction(env)
+        txn = lamdb.Transaction(env)
         for db in db1, db2:
             stat = txn.stat(db)
             for k in 'psize', 'depth', 'branch_pages', 'overflow_pages',\
@@ -218,11 +218,11 @@ class StatTest(unittest.TestCase):
                 assert stat[k] >= 0
             assert stat['entries'] == 0
 
-        txn = lmdb.Transaction(env, write=True)
+        txn = lamdb.Transaction(env, write=True)
         txn.put(B('a'), B('b'), db=db1)
         txn.commit()
 
-        txn = lmdb.Transaction(env)
+        txn = lamdb.Transaction(env)
         stat = txn.stat(db1)
         assert stat['entries'] == 1
 
@@ -258,10 +258,10 @@ class DropTest(unittest.TestCase):
         txn = env.begin(write=True)
         txn.put(B('a'), B('a'), db=db1)
         txn.drop(db1)
-        self.assertRaises(lmdb.InvalidParameterError,
-            lambda: txn.get(B('a'), db=db1))
-        self.assertRaises(lmdb.InvalidParameterError,
-            lambda: txn.drop(db1))
+        self.assertRaises(lamdb.InvalidParameterError,
+                          lambda: txn.get(B('a'), db=db1))
+        self.assertRaises(lamdb.InvalidParameterError,
+                          lambda: txn.drop(db1))
 
     def test_double_delete(self):
         _, env = testlib.temp_env()
@@ -270,20 +270,20 @@ class DropTest(unittest.TestCase):
         txn = env.begin(write=True, db=db1)
         txn.put(B('a'), B('a'), db=db1)
         txn.drop(db1)
-        self.assertRaises(lmdb.InvalidParameterError,
-            lambda: txn.get(B('a'), db=db1))
-        self.assertRaises(lmdb.InvalidParameterError,
-            lambda: txn.drop(db1))
+        self.assertRaises(lamdb.InvalidParameterError,
+                          lambda: txn.get(B('a'), db=db1))
+        self.assertRaises(lamdb.InvalidParameterError,
+                          lambda: txn.drop(db1))
         txn.commit()
 
         db1 = env.open_db(B('db1'))
         txn = env.begin(write=True, db=db1)
         txn.put(B('a'), B('a'), db=db1)
         txn.drop(db1)
-        self.assertRaises(lmdb.InvalidParameterError,
-            lambda: txn.get(B('a'), db=db1))
-        self.assertRaises(lmdb.InvalidParameterError,
-            lambda: txn.drop(db1))
+        self.assertRaises(lamdb.InvalidParameterError,
+                          lambda: txn.get(B('a'), db=db1))
+        self.assertRaises(lamdb.InvalidParameterError,
+                          lambda: txn.drop(db1))
         txn.commit()
 
 
@@ -375,8 +375,8 @@ class GetTest(unittest.TestCase):
     def test_empty_key(self):
         _, env = testlib.temp_env()
         txn = env.begin()
-        self.assertRaises(lmdb.BadValsizeError,
-            lambda: txn.get(B('')))
+        self.assertRaises(lamdb.BadValsizeError,
+                          lambda: txn.get(B('')))
 
     def test_db(self):
         _, env = testlib.temp_env()
@@ -466,14 +466,14 @@ class PutTest(unittest.TestCase):
     def test_ro_txn(self):
         _, env = testlib.temp_env()
         txn = env.begin()
-        self.assertRaises(lmdb.ReadonlyError,
-            lambda: txn.put(B('a'), B('a')))
+        self.assertRaises(lamdb.ReadonlyError,
+                          lambda: txn.put(B('a'), B('a')))
 
     def test_empty_key_value(self):
         _, env = testlib.temp_env()
         txn = env.begin(write=True)
-        self.assertRaises(lmdb.BadValsizeError,
-            lambda: txn.put(B(''), B('a')))
+        self.assertRaises(lamdb.BadValsizeError,
+                          lambda: txn.put(B(''), B('a')))
 
     def test_dupsort(self):
         _, env = testlib.temp_env()
@@ -507,14 +507,14 @@ class ReplaceTest(unittest.TestCase):
     def test_ro_txn(self):
         _, env = testlib.temp_env()
         txn = env.begin()
-        self.assertRaises(lmdb.ReadonlyError,
-            lambda: txn.replace(B('a'), B('a')))
+        self.assertRaises(lamdb.ReadonlyError,
+                          lambda: txn.replace(B('a'), B('a')))
 
     def test_empty_key_value(self):
         _, env = testlib.temp_env()
         txn = env.begin(write=True)
-        self.assertRaises(lmdb.BadValsizeError,
-            lambda: txn.replace(B(''), B('a')))
+        self.assertRaises(lamdb.BadValsizeError,
+                          lambda: txn.replace(B(''), B('a')))
 
     def test_dupsort_noexist(self):
         _, env = testlib.temp_env()
@@ -552,7 +552,7 @@ class LeakTest(unittest.TestCase):
 
     def test_open_close(self):
         temp_dir = testlib.temp_dir()
-        env = lmdb.open(temp_dir)
+        env = lamdb.open(temp_dir)
         with env.begin() as txn:
             pass
         env.close()

@@ -13,7 +13,7 @@ try:
     import affinity
 except:
     affinity = False
-import lmdb
+import lamdb
 
 
 USE_SPARSE_FILES = sys.platform != 'darwin'
@@ -27,12 +27,12 @@ else:
 
 
 def open_env():
-    return lmdb.open(DB_PATH,
-        map_size=1048576 * 1024,
-        metasync=False,
-        sync=False,
-        map_async=True,
-        writemap=USE_SPARSE_FILES)
+    return lamdb.open(DB_PATH,
+                      map_size=1048576 * 1024,
+                      metasync=False,
+                      sync=False,
+                      map_async=True,
+                      writemap=USE_SPARSE_FILES)
 
 
 def make_keys():

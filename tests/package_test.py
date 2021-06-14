@@ -1,5 +1,5 @@
 #
-# Copyright 2013 The py-lmdb authors, all rights reserved.
+# Copyright 2013 The py-lamdb authors, all rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted only as authorized by the OpenLDAP
@@ -23,17 +23,17 @@
 from __future__ import absolute_import
 import unittest
 
-import lmdb
+import lamdb
 
 
 class PackageExportsTest(unittest.TestCase):
     """
     Ensure the list of exported names matches a predefined list. Designed to
     ensure future interface changes to cffi.py and cpython.c don't break
-    consistency of "from lmdb import *".
+    consistency of "from lamdb import *".
     """
     def test_exports(self):
-        assert sorted(lmdb.__all__) == [
+        assert sorted(lamdb.__all__) == [
             'BadDbiError',
             'BadRslotError',
             'BadTxnError',

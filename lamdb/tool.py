@@ -1,5 +1,5 @@
 #
-# Copyright 2013 The py-lmdb authors, all rights reserved.
+# Copyright 2013 The py-lamdb authors, all rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted only as authorized by the OpenLDAP
@@ -24,10 +24,10 @@
 Basic tools for working with LMDB.
 
     copy: Consistent high speed backup an environment.
-        %prog copy -e source.lmdb target.lmdb
+        %prog copy -e source.lamdb target.lamdb
 
     copyfd: Consistent high speed backup an environment to stdout.
-        %prog copyfd -e source.lmdb > target.lmdb/data.mdb
+        %prog copyfd -e source.lamdb > target.lamdb/data.mdb
 
     drop: Delete one or more sub-databases.
         %prog drop db1
@@ -56,7 +56,7 @@ Basic tools for working with LMDB.
         The special db name ":main:" may be used to indicate the main DB.
 
     rewrite: Re-create an environment using MDB_APPEND
-        %prog rewrite -e src.lmdb -E dst.lmdb [<db1> [<dbN> ..]]
+        %prog rewrite -e src.lamdb -E dst.lamdb [<db1> [<dbN> ..]]
 
         If no databases are given, rewrites only the main database.
 
@@ -93,7 +93,7 @@ except ImportError:
     except ImportError:
         from StringIO import StringIO  # type: ignore
 
-import lmdb
+import lamdb
 
 
 BUF_SIZE = 10485760
@@ -200,7 +200,7 @@ def make_parser():
 def die(fmt, *args):
     if args:
         fmt %= args
-    sys.stderr.write('lmdb.tool: %s\n' % (fmt,))
+    sys.stderr.write('lamdb.tool: %s\n' % (fmt,))
     raise SystemExit(1)
 
 
@@ -500,11 +500,11 @@ def cmd_rewrite(opts, args):
         die('Must specify target environment path with -E')
 
     src_info = ENV.info()
-    target_env = lmdb.open(opts.target_env,
-                           map_size=src_info['map_size'] * 2,
-                           max_dbs=opts.max_dbs, sync=False,
-                           writemap=True, map_async=True,
-                           metasync=False)
+    target_env = lamdb.open(opts.target_env,
+                            map_size=src_info['map_size'] * 2,
+                            max_dbs=opts.max_dbs, sync=False,
+                            writemap=True, map_async=True,
+                            metasync=False)
 
     dbs = []
     for arg in args:
@@ -609,8 +609,8 @@ def main(argv=None):
         die('Please specify environment (--env)')
 
     global ENV
-    ENV = lmdb.open(opts.env, map_size=opts.map_size * 1048576, subdir=not opts.use_single_file,
-                    max_dbs=opts.max_dbs, create=False, readonly=opts.read == 'READ')
+    ENV = lamdb.open(opts.env, map_size=opts.map_size * 1048576, subdir=not opts.use_single_file,
+                     max_dbs=opts.max_dbs, create=False, readonly=opts.read == 'READ')
 
     if opts.db:
         global DB
